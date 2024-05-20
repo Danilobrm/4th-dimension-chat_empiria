@@ -2,7 +2,7 @@
 //npm install express mysql2 sequelize bcryptjs jsonwebtoken dotenv
 const express = require('express');
 const sequelize = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
+// const authRoutes = require('./routes/authRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
 sequelize.sync().then(() => {
   app.listen(PORT, () => {
