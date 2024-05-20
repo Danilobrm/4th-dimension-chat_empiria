@@ -1,21 +1,37 @@
-//npm install mysql express
-//npm install express mysql2 sequelize bcryptjs jsonwebtoken dotenv
-const express = require('express');
-const sequelize = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-require('dotenv').config();
+const readline = require('readline');
+const WebSocket = require('ws');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-app.use(express.json());
+const socket = new WebSocket('ws://localhost:8080');
 
-app.use('/api/auth', authRoutes);
+socket.on('open', function() {
+  console.log('Conectado ao servidor WebSocket');
 
-sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}).catch(error => {
-  console.log('Unable to connect to the database:', error);
+  // Função para enviar mensagem e continuar solicitando novas mensagens
+  function sendMessage() {
+    rl.question('Digite sua mensagem (ou digite "exit" para encerrar): ', function(message) {
+      if (message.toLowerCase() === 'exit') {
+        // Se o usuário digitar 'exit', fecha a conexão e termina o programa
+        socket.close();
+        rl.close();
+      } else {
+        // Envia a mensagem para o servidor
+        socket.send(message);
+        // Chama novamente a função para continuar solicitando novas mensagens
+        sendMessage();
+      }
+    });
+  }
+
+  // Inicia o ciclo de envio de mensagens
+  sendMessage();
+});
+
+socket.on('message', function(message) {
+  // Recebe a mensagem do servidor e exibe no terminal
+  console.log('Mensagem do servidor:', message);
 });
